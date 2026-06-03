@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -80,7 +79,6 @@ button{
     cursor:pointer;
 }
 </style>
-
 </head>
 
 <body>
@@ -93,64 +91,56 @@ button{
 
 <div id="home" class="page active">
 
-```
-<div class="home">
+    <div class="home">
 
-    <div class="btn"
-    onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSfgV1BG2a-y93Y6jIbJLc5KeOAkMmkpehbUDXc-eCaq01d04w/viewform?usp=header','_blank')">
-        글쓰기
+        <div class="btn"
+        onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSfgV1BG2a-y93Y6jIbJLc5KeOAkMmkpehbUDXc-eCaq01d04w/viewform?usp=header','_blank')">
+            글쓰기
+        </div>
+
+        <div class="btn"
+        onclick="openSearch()">
+            검색하기
+        </div>
+
     </div>
-
-    <div class="btn"
-    onclick="openSearch()">
-        검색하기
-    </div>
-
-</div>
-```
 
 </div>
 
 <div id="search" class="page">
 
-```
-<button onclick="showPage('home')">
-    홈으로
-</button>
+    <button onclick="showPage('home')">
+        홈으로
+    </button>
 
-<h2>연구자료 검색</h2>
+    <h2>연구자료 검색</h2>
 
-<input
-    id="searchBox"
-    type="text"
-    placeholder="제목 또는 작성자 검색"
-    onkeyup="filterArticles()"
->
+    <input
+        id="searchBox"
+        type="text"
+        placeholder="제목 검색"
+        onkeyup="filterArticles()"
+    >
 
-<div id="articleList">
-    불러오는 중...
-</div>
-```
+    <div id="articleList">
+        불러오는 중...
+    </div>
 
 </div>
 
 <div id="article" class="page">
 
-```
-<button onclick="showPage('search')">
-    뒤로가기
-</button>
+    <button onclick="showPage('search')">
+        뒤로가기
+    </button>
 
-<h2 id="viewTitle"></h2>
+    <h2 id="viewTitle"></h2>
 
-<p id="viewAuthor"></p>
+    <p id="viewTime"></p>
 
-<p id="viewTime"></p>
+    <hr>
 
-<hr>
-
-<p id="viewContent"></p>
-```
+    <div id="viewContent"></div>
 
 </div>
 
@@ -159,12 +149,11 @@ button{
 <script>
 
 const API_URL =
-"https://script.google.com/macros/s/AKfycbz_qeoroHRVpNzLqXwDO-s-em5WimCa3eLtZZyzb1_hyO9hse9sAxAtuXmUHEgUyGep/exec";
+"https://script.google.com/macros/s/AKfycbzSKldXiHZyNjBRxz0FVvuf_Y5pN_mISB5TXNnBe21FRezktCEWF1gzU7uPN0CDWfc/exec";
 
 let articles = [];
 
 function showPage(id){
-
     document.querySelectorAll(".page").forEach(page=>{
         page.classList.remove("active");
     });
@@ -177,7 +166,6 @@ async function loadArticles(){
     try{
 
         const response = await fetch(API_URL);
-
         articles = await response.json();
 
         renderArticles(articles);
@@ -214,15 +202,16 @@ function renderArticles(list){
         div.className = "article";
 
         div.innerHTML =
-        "<strong>" + article.title + "</strong><br>" +
-        "작성자: " + article.author;
+        "<strong>" + article.title + "</strong>";
 
         div.onclick = ()=>{
             openArticle(article);
         };
 
         articleList.appendChild(div);
+
     });
+
 }
 
 function filterArticles(){
@@ -234,26 +223,20 @@ function filterArticles(){
 
     const filtered =
     articles.filter(article =>
-
         (article.title || "")
         .toLowerCase()
         .includes(keyword)
-
-        ||
-
-        (article.author || "")
-        .toLowerCase()
-        .includes(keyword)
-
     );
 
     renderArticles(filtered);
+
 }
 
 function openSearch(){
 
     showPage("search");
     loadArticles();
+
 }
 
 function openArticle(article){
@@ -261,10 +244,6 @@ function openArticle(article){
     document.getElementById("viewTitle")
     .textContent =
     article.title || "";
-
-    document.getElementById("viewAuthor")
-    .textContent =
-    "작성자: " + (article.author || "");
 
     document.getElementById("viewTime")
     .textContent =
@@ -275,6 +254,7 @@ function openArticle(article){
     article.content || "";
 
     showPage("article");
+
 }
 
 </script>

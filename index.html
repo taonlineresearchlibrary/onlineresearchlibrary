@@ -52,7 +52,7 @@ header{
     display:block;
 }
 
-input, textarea{
+input{
     width:100%;
     padding:10px;
     margin:10px 0;
@@ -65,9 +65,14 @@ input, textarea{
     margin-top:10px;
     cursor:pointer;
 }
+
+.article:hover{
+    background:#f0f0f0;
+}
 </style>
 
 </head>
+
 <body>
 
 <header>
@@ -87,7 +92,7 @@ input, textarea{
         </div>
 
         <div class="btn"
-             onclick="showPage('search')">
+             onclick="openSearch()">
             검색하기
         </div>
 
@@ -101,18 +106,15 @@ input, textarea{
         홈으로
     </button>
 
-    <h2>검색</h2>
+    <h2>연구자료 검색</h2>
 
-    <input placeholder="검색어 입력">
+    <input
+        type="text"
+        placeholder="검색 기능은 추후 추가 예정"
+    >
 
-    <div class="article"
-         onclick="showPage('article')">
-        우박수 추측 탐구
-    </div>
-
-    <div class="article"
-         onclick="showPage('article')">
-        소수의 성질 연구
+    <div id="articleList">
+        불러오는 중...
     </div>
 
 </div>
@@ -123,17 +125,15 @@ input, textarea{
         뒤로가기
     </button>
 
-    <h2>우박수 추측 탐구</h2>
+    <h2 id="viewTitle"></h2>
 
-    <p>작성자: 홍길동</p>
+    <p id="viewAuthor"></p>
 
-    <p>작성시간: 2026-06-01</p>
+    <p id="viewTime"></p>
 
     <hr>
 
-    <p>
-        이 영역은 연구글 본문이 표시되는 공간입니다.
-    </p>
+    <p id="viewContent"></p>
 
 </div>
 ```
@@ -141,14 +141,76 @@ input, textarea{
 </div>
 
 <script>
+
+const API_URL =
+"https://script.google.com/macros/s/AKfycbxswEfEGLPNFPteAfnA9a0gt96j45cR-x1HQxI7ol9kj-BdfHWE4bn9q5RGoODmMg-8/exec";
+
+let articles = [];
+
 function showPage(id){
 
-    document.querySelectorAll('.page').forEach(function(page){
+    document.querySelectorAll('.page').forEach(page=>{
         page.classList.remove('active');
     });
 
     document.getElementById(id).classList.add('active');
 }
+
+async function loadArticles(){
+
+    const response = await fetch(API_URL);
+    articles = await response.json();
+
+    const list = document.getElementById("articleList");
+
+    list.innerHTML = "";
+
+    if(articles.length===0){
+        list.innerHTML = "등록된 연구자료가 없습니다.";
+        return;
+    }
+
+    articles.reverse().forEach((article,index)=>{
+
+        const div = document.createElement("div");
+
+        div.className = "article";
+
+        div.innerHTML =
+        "<strong>" + article.title + "</strong><br>" +
+        "작성자: " + article.author;
+
+        div.onclick = ()=>{
+            openArticle(article);
+        };
+
+        list.appendChild(div);
+    });
+}
+
+function openSearch(){
+
+    showPage("search");
+    loadArticles();
+}
+
+function openArticle(article){
+
+    document.getElementById("viewTitle").textContent =
+        article.title;
+
+    document.getElementById("viewAuthor").textContent =
+        "작성자: " + article.author;
+
+    document.getElementById("viewTime").textContent =
+        "작성시간: " + article.time;
+
+    document.getElementById("viewContent").textContent =
+        article.content;
+
+    showPage("article");
+}
+
 </script>
 
 </body>

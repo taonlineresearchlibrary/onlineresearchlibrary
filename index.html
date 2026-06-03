@@ -31,6 +31,7 @@ header{
     justify-content:center;
     gap:30px;
     margin-top:40px;
+    flex-wrap:wrap;
 }
 
 .btn{
@@ -42,6 +43,10 @@ header{
     align-items:center;
     font-size:24px;
     cursor:pointer;
+}
+
+.btn:hover{
+    background:#f5f5f5;
 }
 
 .page{
@@ -61,13 +66,18 @@ input{
 
 .article{
     border:1px solid black;
-    padding:10px;
+    padding:15px;
     margin-top:10px;
     cursor:pointer;
 }
 
 .article:hover{
-    background:#f0f0f0;
+    background:#f7f7f7;
+}
+
+button{
+    padding:10px;
+    cursor:pointer;
 }
 </style>
 
@@ -81,98 +91,125 @@ input{
 
 <div class="container">
 
-```
 <div id="home" class="page active">
 
-    <div class="home">
+```
+<div class="home">
 
-        <div class="btn"
-             onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSc-pyzWNAWTTKNqrLbYGiiLVgoTBLEACLYkUvgvCpmQqh34CA/viewform?usp=header','_blank')">
-            글쓰기
-        </div>
-
-        <div class="btn"
-             onclick="openSearch()">
-            검색하기
-        </div>
-
+    <div class="btn"
+    onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSfgV1BG2a-y93Y6jIbJLc5KeOAkMmkpehbUDXc-eCaq01d04w/viewform?usp=header','_blank')">
+        글쓰기
     </div>
+
+    <div class="btn"
+    onclick="openSearch()">
+        검색하기
+    </div>
+
+</div>
+```
 
 </div>
 
 <div id="search" class="page">
 
-    <button onclick="showPage('home')">
-        홈으로
-    </button>
+```
+<button onclick="showPage('home')">
+    홈으로
+</button>
 
-    <h2>연구자료 검색</h2>
+<h2>연구자료 검색</h2>
 
-    <input
-        type="text"
-        placeholder="검색 기능은 추후 추가 예정"
-    >
+<input
+    id="searchBox"
+    type="text"
+    placeholder="제목 또는 작성자 검색"
+    onkeyup="filterArticles()"
+>
 
-    <div id="articleList">
-        불러오는 중...
-    </div>
+<div id="articleList">
+    불러오는 중...
+</div>
+```
 
 </div>
 
 <div id="article" class="page">
 
-    <button onclick="showPage('search')">
-        뒤로가기
-    </button>
+```
+<button onclick="showPage('search')">
+    뒤로가기
+</button>
 
-    <h2 id="viewTitle"></h2>
+<h2 id="viewTitle"></h2>
 
-    <p id="viewAuthor"></p>
+<p id="viewAuthor"></p>
 
-    <p id="viewTime"></p>
+<p id="viewTime"></p>
 
-    <hr>
+<hr>
 
-    <p id="viewContent"></p>
+<p id="viewContent"></p>
+```
 
 </div>
-```
 
 </div>
 
 <script>
 
 const API_URL =
-"https://script.google.com/macros/s/AKfycbxswEfEGLPNFPteAfnA9a0gt96j45cR-x1HQxI7ol9kj-BdfHWE4bn9q5RGoODmMg-8/exec";
+"https://script.google.com/macros/s/AKfycbz_qeoroHRVpNzLqXwDO-s-em5WimCa3eLtZZyzb1_hyO9hse9sAxAtuXmUHEgUyGep/exec";
 
 let articles = [];
 
 function showPage(id){
 
-    document.querySelectorAll('.page').forEach(page=>{
-        page.classList.remove('active');
+    document.querySelectorAll(".page").forEach(page=>{
+        page.classList.remove("active");
     });
 
-    document.getElementById(id).classList.add('active');
+    document.getElementById(id).classList.add("active");
 }
 
 async function loadArticles(){
 
-    const response = await fetch(API_URL);
-    articles = await response.json();
+    try{
 
-    const list = document.getElementById("articleList");
+        const response = await fetch(API_URL);
 
-    list.innerHTML = "";
+        articles = await response.json();
 
-    if(articles.length===0){
-        list.innerHTML = "등록된 연구자료가 없습니다.";
+        renderArticles(articles);
+
+    }catch(error){
+
+        document.getElementById("articleList").innerHTML =
+        "자료를 불러오지 못했습니다.";
+
+        console.error(error);
+    }
+}
+
+function renderArticles(list){
+
+    const articleList =
+    document.getElementById("articleList");
+
+    articleList.innerHTML = "";
+
+    if(list.length === 0){
+
+        articleList.innerHTML =
+        "등록된 연구자료가 없습니다.";
+
         return;
     }
 
-    articles.reverse().forEach((article,index)=>{
+    [...list].reverse().forEach(article=>{
 
-        const div = document.createElement("div");
+        const div =
+        document.createElement("div");
 
         div.className = "article";
 
@@ -184,8 +221,33 @@ async function loadArticles(){
             openArticle(article);
         };
 
-        list.appendChild(div);
+        articleList.appendChild(div);
     });
+}
+
+function filterArticles(){
+
+    const keyword =
+    document.getElementById("searchBox")
+    .value
+    .toLowerCase();
+
+    const filtered =
+    articles.filter(article =>
+
+        (article.title || "")
+        .toLowerCase()
+        .includes(keyword)
+
+        ||
+
+        (article.author || "")
+        .toLowerCase()
+        .includes(keyword)
+
+    );
+
+    renderArticles(filtered);
 }
 
 function openSearch(){
@@ -196,17 +258,21 @@ function openSearch(){
 
 function openArticle(article){
 
-    document.getElementById("viewTitle").textContent =
-        article.title;
+    document.getElementById("viewTitle")
+    .textContent =
+    article.title || "";
 
-    document.getElementById("viewAuthor").textContent =
-        "작성자: " + article.author;
+    document.getElementById("viewAuthor")
+    .textContent =
+    "작성자: " + (article.author || "");
 
-    document.getElementById("viewTime").textContent =
-        "작성시간: " + article.time;
+    document.getElementById("viewTime")
+    .textContent =
+    "작성시간: " + (article.time || "");
 
-    document.getElementById("viewContent").textContent =
-        article.content;
+    document.getElementById("viewContent")
+    .textContent =
+    article.content || "";
 
     showPage("article");
 }
